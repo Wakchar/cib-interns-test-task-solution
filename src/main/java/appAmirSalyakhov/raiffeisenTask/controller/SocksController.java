@@ -1,29 +1,45 @@
 package appAmirSalyakhov.raiffeisenTask.controller;
 
-import appAmirSalyakhov.raiffeisenTask.model.SocksDto;
-import appAmirSalyakhov.raiffeisenTask.repository.SocksRepository;
+import appAmirSalyakhov.raiffeisenTask.model.Socks;
 import appAmirSalyakhov.raiffeisenTask.service.socks.SocksService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/socks")
+@Validated
+@RequestMapping(value = "/socks")
 public class SocksController {
 
-    @Autowired
-    private SocksService socksService;
+    private final SocksService socksService;
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<SocksDto> getAllSocks() {
-        return socksService.getAllSocksFromWarehouse();
+    public SocksController(SocksService socksService) {
+        this.socksService = socksService;
     }
 
-    @GetMapping(params = {"color"},produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<SocksDto> getSocksByRequestValue(@Param("color") String color){
-        return socksService.getAllByColor(color);
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Socks>> getSocksByRequestValue(@RequestParam(name = "color") String color,
+                                                                  @RequestParam(name = "operation") String operation,
+                                                                  @RequestParam(name = "cottonPart")@Min(0) @Max(100) Integer cottonPart){
+        List<Socks> responseSocksList = socksService.getSockByColorAndCottonPart(color, operation, cottonPart);
+        return new ResponseEntity<>(responseSocksList, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/income", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> saveOrUpdateSocksInWarehouse(@RequestBody Socks socks) {
+        socksService.saveOrUpdateSocksQuantityFormWarehouse(socks);
+        return new ResponseEntity<>("Socks successful added in Warehouse",HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/outcome", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> subtractSocksFromWarehouse(@RequestBody Socks socks) {
+        return socksService.subtractSocksFormWarehouse(socks);
     }
 }
