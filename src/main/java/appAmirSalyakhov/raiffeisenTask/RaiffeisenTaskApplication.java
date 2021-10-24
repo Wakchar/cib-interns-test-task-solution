@@ -9,4 +9,5 @@ public class RaiffeisenTaskApplication {
     public static void main(String[] args) {
         SpringApplication.run(RaiffeisenTaskApplication.class, args);
     }
+
 }

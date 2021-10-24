@@ -1,6 +1,6 @@
 package appAmirSalyakhov.raiffeisenTask.service.socks.impl;
 
-import appAmirSalyakhov.raiffeisenTask.advice.SocksControllerExceptionHandler;
+import appAmirSalyakhov.raiffeisenTask.model.Response;
 import appAmirSalyakhov.raiffeisenTask.model.Socks;
 import appAmirSalyakhov.raiffeisenTask.repository.SocksRepository;
 import appAmirSalyakhov.raiffeisenTask.service.socks.SocksService;
@@ -11,8 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
+
 
 @Service
 @Transactional
@@ -21,41 +21,58 @@ public class SocksServiceImpl implements SocksService {
     @Autowired
     private SocksRepository socksRepository;
 
-    public List<Socks> getSockByColorAndCottonPart(String color, String operation, int cottonPart) {
+    public Integer getSockByColorAndCottonPart(String color, String operation, int cottonPart) {
+        List<Socks> socksResponse;
         switch (operation) {
             case "moreThan":
-                return socksRepository.findSocksByColorAndCottonPartIsGreaterThan(color.toLowerCase(), cottonPart);
+                socksResponse = socksRepository.findSocksByColorAndCottonPartIsGreaterThan(color, cottonPart);
+                break;
             case "lessThan":
-                return socksRepository.findSocksByColorAndCottonPartIsLessThan(color.toLowerCase(), cottonPart);
+                socksResponse = socksRepository.findSocksByColorAndCottonPartIsLessThan(color, cottonPart);
+                break;
             case "equal":
-                return Collections.singletonList(socksRepository.findSocksByColorAndCottonPartEquals(color, cottonPart));
+                socksResponse = socksRepository.findSocksByColorAndCottonPartEquals(color, cottonPart);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + operation);
         }
-        throw new SocksControllerExceptionHandler();
+        int socksValue = 0;
+        for (Socks socks : socksResponse) {
+            socksValue += socks.getQuantity();
+        }
+        return socksValue;
     }
 
-    public void saveOrUpdateSocksQuantityFormWarehouse(Socks incomeSocks) {
-        try {
-            Socks selectForUpdateSocks = socksRepository.findSocksByColorAndCottonPartEquals(incomeSocks.getColor(), incomeSocks.getCottonPart());
+    public ResponseEntity<Response> saveOrUpdateSocksQuantityFormWarehouse(Socks incomeSocks) {
+        Socks selectForUpdateSocks = socksRepository.selectSocksByColorAndCottonPartEquals(incomeSocks.getColor(), incomeSocks.getCottonPart());
+        Response responseBody = new Response();
+        if (incomeSocks.getQuantity() > 0) {
             if (selectForUpdateSocks != null) {
                 selectForUpdateSocks.setQuantity(selectForUpdateSocks.getQuantity() + incomeSocks.getQuantity());
                 socksRepository.saveAndFlush(selectForUpdateSocks);
             } else socksRepository.saveAndFlush(incomeSocks);
-        } catch (SocksControllerExceptionHandler e) {
-            throw new SocksControllerExceptionHandler();
-        }
+            responseBody.setMessage("Socks successful added in Warehouse");
+            new ResponseEntity<>(responseBody, HttpStatus.OK);
+        } else
+            responseBody.setMessage("Please check quantity");
+        return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity<String> subtractSocksFormWarehouse(Socks outcomeSocks) {
-        Socks selectForUpdateSocks = socksRepository.findSocksByColorAndCottonPartEquals(outcomeSocks.getColor(), outcomeSocks.getCottonPart());
+    public ResponseEntity<Response> subtractSocksFormWarehouse(Socks outcomeSocks) {
+        Socks selectForUpdateSocks = socksRepository.selectSocksByColorAndCottonPartEquals(outcomeSocks.getColor(), outcomeSocks.getCottonPart());
+        Response responseBody = new Response();
         if (selectForUpdateSocks != null) {
             if (selectForUpdateSocks.getQuantity() < outcomeSocks.getQuantity()) {
-                return new ResponseEntity<>("Quantity must be less or equal than, " + selectForUpdateSocks.getQuantity()
-                        + " units in Warehouse", HttpStatus.BAD_REQUEST);
+                responseBody.setMessage("Quantity must be less or equal than, " + selectForUpdateSocks.getQuantity()
+                        + " units in Warehouse is available");
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
             } else
                 selectForUpdateSocks.setQuantity(selectForUpdateSocks.getQuantity() - outcomeSocks.getQuantity());
             socksRepository.saveAndFlush(selectForUpdateSocks);
-            return new ResponseEntity<>("Ok", HttpStatus.OK);
+            responseBody.setMessage("Socks successful subtract from Warehouse");
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
         }
-        return new ResponseEntity<>("Cannot subtract socks", HttpStatus.BAD_REQUEST);
+        responseBody.setMessage("Cannot subtract socks");
+        return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
     }
 }

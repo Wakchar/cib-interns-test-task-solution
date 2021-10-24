@@ -14,5 +14,9 @@ public interface SocksRepository extends JpaRepository<Socks, Long> {
     @Query(value = "SELECT id, color, cotton_part, available_quantity FROM socks_warehouse WHERE color = ?1 AND cotton_part < ?2", nativeQuery = true)
     List<Socks> findSocksByColorAndCottonPartIsLessThan(String color, int cottonParts);
 
-    Socks findSocksByColorAndCottonPartEquals(String color, int cottonPart);
+    @Query(value = "SELECT id, color, cotton_part, available_quantity FROM socks_warehouse  WHERE color = ?1 AND cotton_part = ?2", nativeQuery = true)
+    List<Socks> findSocksByColorAndCottonPartEquals(String color, int cottonPart);
+
+    @Query(value = "SELECT id, color, cotton_part, available_quantity FROM socks_warehouse  WHERE color = ?1 AND cotton_part = ?2", nativeQuery = true)
+    Socks selectSocksByColorAndCottonPartEquals(String color, int cottonPart);
 }

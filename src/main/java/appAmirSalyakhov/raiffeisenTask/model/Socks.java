@@ -9,6 +9,8 @@ import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 @Entity
@@ -29,6 +31,7 @@ public class Socks implements Serializable {
     @Column(name = "id")
     private Long id;
 
+    @NotBlank
     @Column(name = "color")
     private String color;
 
@@ -37,7 +40,7 @@ public class Socks implements Serializable {
     @Max(100)
     private Integer cottonPart;
 
-    @Min(1)
+    @Min(0)
     @Column(name = "available_quantity")
     private int quantity;
 }

@@ -1,17 +1,17 @@
 package appAmirSalyakhov.raiffeisenTask.controller;
 
+import appAmirSalyakhov.raiffeisenTask.advice.SocksControllerExceptionHandler;
+import appAmirSalyakhov.raiffeisenTask.model.Response;
 import appAmirSalyakhov.raiffeisenTask.model.Socks;
 import appAmirSalyakhov.raiffeisenTask.service.socks.SocksService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @Validated
@@ -25,21 +25,31 @@ public class SocksController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Socks>> getSocksByRequestValue(@RequestParam(name = "color") String color,
-                                                                  @RequestParam(name = "operation") String operation,
-                                                                  @RequestParam(name = "cottonPart")@Min(0) @Max(100) Integer cottonPart){
-        List<Socks> responseSocksList = socksService.getSockByColorAndCottonPart(color, operation, cottonPart);
-        return new ResponseEntity<>(responseSocksList, HttpStatus.OK);
+    public Integer getSocksByRequestValue(@RequestParam(name = "color") String color,
+                                          @RequestParam(name = "operation") String operation,
+                                          @RequestParam(name = "cottonPart") Integer cottonPart) {
+        return socksService.getSockByColorAndCottonPart(color, operation, cottonPart);
     }
 
     @PostMapping(value = "/income", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> saveOrUpdateSocksInWarehouse(@RequestBody Socks socks) {
-        socksService.saveOrUpdateSocksQuantityFormWarehouse(socks);
-        return new ResponseEntity<>("Socks successful added in Warehouse",HttpStatus.OK);
+    public ResponseEntity<Response> saveOrUpdateSocksInWarehouse(@RequestBody Socks socks) {
+        ResponseEntity<Response> response;
+        try {
+            response = socksService.saveOrUpdateSocksQuantityFormWarehouse(socks);
+        } catch (SocksControllerExceptionHandler ex) {
+            return new SocksControllerExceptionHandler().handleNotReadableException();
+        }
+        return response;
     }
 
     @PostMapping(value = "/outcome", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> subtractSocksFromWarehouse(@RequestBody Socks socks) {
-        return socksService.subtractSocksFormWarehouse(socks);
+    public ResponseEntity<Response> subtractSocksFromWarehouse(@RequestBody Socks socks) {
+        ResponseEntity<Response> response;
+        try {
+            response = socksService.subtractSocksFormWarehouse(socks);
+        } catch (SocksControllerExceptionHandler ex) {
+            return new SocksControllerExceptionHandler().handleNotReadableException();
+        }
+        return response;
     }
 }
