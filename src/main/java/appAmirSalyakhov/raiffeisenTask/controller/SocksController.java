@@ -24,6 +24,11 @@ public class SocksController {
         this.socksService = socksService;
     }
 
+    @GetMapping(value = "/all",produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Socks> getAllSocksFromWarehouse(){
+        return socksService.getAllSocks();
+    };
+
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Integer getSocksByRequestValue(@RequestParam(name = "color") String color,
                                           @RequestParam(name = "operation") String operation,

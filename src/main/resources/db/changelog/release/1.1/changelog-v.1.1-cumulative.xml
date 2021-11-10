@@ -8,6 +8,17 @@
         http://www.liquibase.org/xml/ns/pro
         http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.5.xsd">
 
-        <include file="01-changelist-socks-warehouse-table.xml" relativeToChangelogFile="true"/>
+    <!--пример с вызовом SQL файла-->
+    <changeSet id="3" author="SalyakhovAR">
+        <tagDatabase tag="fillDataToSocksWarehouse"/>
+    </changeSet>
+
+    <changeSet id="3.1" author="SalyakhovAR">
+        <sqlFile dbms="postgresql"
+                 encoding="UTF-8"
+                 relativeToChangelogFile="true"
+                 stripComments="true"
+                 path="fill-data-socks-warehouse-table.sql"/>
+    </changeSet>
 
 </databaseChangeLog>

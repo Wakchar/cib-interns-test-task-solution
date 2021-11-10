@@ -13,4 +13,6 @@ public interface SocksService {
     ResponseEntity<Response> saveOrUpdateSocksQuantityFormWarehouse(Socks socks);
 
     ResponseEntity<Response> subtractSocksFormWarehouse(Socks socks);
+
+    List<Socks> getAllSocks();
 }

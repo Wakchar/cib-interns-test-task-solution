@@ -8,11 +8,10 @@
         http://www.liquibase.org/xml/ns/pro
         http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.5.xsd">
 
-        <changeSet id="3" author="AmirSalyakhov">
-            <sqlFile dbms="postgresql"
-                     encoding="UTF-8"
-                     relativeToChangelogFile="true"
-                     stripComments="true"
-                     path="01-create-socks-warehouse-table.sql"/>
+        <changeSet id="tables" author="SalyakhovAR">
+                <tagDatabase tag="creatAndUpdate"/>
         </changeSet>
+
+        <include file="changelist-socks-warehouse-table.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

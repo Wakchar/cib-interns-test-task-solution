@@ -12,14 +12,7 @@
         <dbms type="postgresql"/>
     </preConditions>
 
-    <changeSet id="0" author="AmirSalyakhov">
-        <tagDatabase tag="db_init"/>
-    </changeSet>
-
-    <include file="changeset/db.changelog-v.1.0.xml" relativeToChangelogFile="true"/>
-
-    <changeSet id="1" author="AmirSalyakhov">
-        <tagDatabase tag="v.1.0"/>
-    </changeSet>
+    <include file="release/1.0/changelog-v.1.0-cumulative.xml" relativeToChangelogFile="true"/>
+    <include file="release/1.1/changelog-v.1.1-cumulative.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

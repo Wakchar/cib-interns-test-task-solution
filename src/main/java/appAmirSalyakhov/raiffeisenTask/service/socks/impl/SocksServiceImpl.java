@@ -21,6 +21,10 @@ public class SocksServiceImpl implements SocksService {
     @Autowired
     private SocksRepository socksRepository;
 
+    public List<Socks> getAllSocks(){
+        return socksRepository.findAll();
+    };
+
     public Integer getSockByColorAndCottonPart(String color, String operation, int cottonPart) {
         List<Socks> socksResponse;
         switch (operation) {
